@@ -746,8 +746,8 @@ function updateUI(params) {
   alert ? banner.classList.add('visible') : banner.classList.remove('visible');
 
   // Switches
-  const sw1 = (params['Switch 1'] || {})['Power'] ?? false;
-  const sw2 = (params['Switch 2'] || {})['Power'] ?? false;
+  const sw1 = (params['Obuvnitsa'] || {})['Power'] ?? false;
+  const sw2 = (params['Vana'] || {})['Power'] ?? false;
   setSwitchUI(1, sw1);
   setSwitchUI(2, sw2);
   sw1State = sw1;
@@ -790,7 +790,7 @@ function setSwitchUI(n, state) {
 async function toggleSwitch(n) {
   if (!token || !nodeId) return;
   const newState = n === 1 ? !sw1State : !sw2State;
-  const devName  = n === 1 ? 'Switch 1' : 'Switch 2';
+  const devName  = n === 1 ? 'Obuvnitsa' : 'Vana';
 
   setSwitchUI(n, newState);
   if (n === 1) sw1State = newState; else sw2State = newState;
