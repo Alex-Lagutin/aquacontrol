@@ -1,958 +1,1411 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AquaControl Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<style>
-  /* ── TOKENS ─────────────────────────────────────────────── */
-  :root {
-    --bg:        #0a0e1a;
-    --bg2:       #111827;
-    --bg3:       #1a2235;
-    --border:    rgba(255,255,255,0.07);
-    --text:      #e8edf5;
-    --muted:     #6b7a99;
-    --accent:    #00d4ff;
-    --accent2:   #0099bb;
-    --green:     #00e5a0;
-    --red:       #ff4d6a;
-    --yellow:    #ffd166;
-    --card-glow: rgba(0,212,255,0.08);
-    --font-head: 'Syne', sans-serif;
-    --font-mono: 'Space Mono', monospace;
-    --radius:    16px;
-    --trans:     0.3s cubic-bezier(.4,0,.2,1);
-  }
-  [data-theme="light"] {
-    --bg:        #f0f4ff;
-    --bg2:       #ffffff;
-    --bg3:       #e4eaf7;
-    --border:    rgba(0,0,0,0.08);
-    --text:      #0a0e1a;
-    --muted:     #6b7a99;
-    --card-glow: rgba(0,153,187,0.06);
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaControl Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --bg: #0a0e1a;
+      --bg2: #111827;
+      --bg3: #1a2235;
+      --border: rgba(255, 255, 255, 0.07);
+      --text: #e8edf5;
+      --muted: #6b7a99;
+      --accent: #00d4ff;
+      --accent2: #0099bb;
+      --green: #00e5a0;
+      --red: #ff4d6a;
+      --yellow: #ffd166;
+      --card-glow: rgba(0, 212, 255, 0.08);
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --radius: 16px;
+      --trans: 0.3s cubic-bezier(.4, 0, .2, 1);
+    }
 
-  /* ── RESET ──────────────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: var(--font-mono);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    transition: background var(--trans), color var(--trans);
-    overflow-x: hidden;
-  }
+    [data-theme="light"] {
+      --bg: #f0f4ff;
+      --bg2: #ffffff;
+      --bg3: #e4eaf7;
+      --border: rgba(0, 0, 0, 0.08);
+      --text: #0a0e1a;
+      --muted: #6b7a99;
+      --card-glow: rgba(0, 153, 187, 0.06);
+    }
 
-  /* ── BACKGROUND GRID ────────────────────────────────────── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0; z-index: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
-  [data-theme="light"] body::before {
-    background-image:
-      linear-gradient(rgba(0,153,187,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,153,187,0.05) 1px, transparent 1px);
-  }
+    /* ── RESET ──────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* ── HEADER ─────────────────────────────────────────────── */
-  header {
-    position: relative; z-index: 10;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 32px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-    backdrop-filter: blur(12px);
-  }
-  .logo {
-    display: flex; align-items: center; gap: 12px;
-    font-family: var(--font-head);
-    font-size: 22px; font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--green));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
-  .logo span { color: var(--accent); }
+    html {
+      scroll-behavior: smooth;
+    }
 
-  .header-right { display: flex; align-items: center; gap: 16px; }
+    body {
+      font-family: var(--font-mono);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--trans), color var(--trans);
+      overflow-x: hidden;
+    }
 
-  .status-pill {
-    display: flex; align-items: center; gap: 7px;
-    padding: 6px 14px;
-    background: var(--bg3);
-    border-radius: 100px;
-    font-size: 12px; color: var(--muted);
-    border: 1px solid var(--border);
-  }
-  .status-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: .6; transform: scale(1.3); }
-  }
+    /* ── BACKGROUND GRID ────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
 
-  /* Theme toggle */
-  .theme-btn {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text); font-size: 18px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all var(--trans);
-  }
-  .theme-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    [data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(0, 153, 187, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 153, 187, 0.05) 1px, transparent 1px);
+    }
 
-  /* Refresh btn */
-  .refresh-btn {
-    display: flex; align-items: center; gap: 7px;
-    padding: 8px 16px; border-radius: 10px;
-    background: var(--accent); color: #000;
-    border: none; font-family: var(--font-mono);
-    font-size: 12px; font-weight: 700;
-    cursor: pointer; transition: all var(--trans);
-    letter-spacing: 0.5px;
-  }
-  .refresh-btn:hover { background: var(--green); transform: translateY(-1px); }
-  .refresh-btn.spinning svg { animation: spin 1s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      backdrop-filter: blur(12px);
+    }
 
-  /* ── MAIN GRID ───────────────────────────────────────────── */
-  main {
-    position: relative; z-index: 1;
-    max-width: 1280px; margin: 0 auto;
-    padding: 32px 24px;
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    grid-template-rows: auto auto 1fr;
-    gap: 20px;
-  }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
 
-  /* ── CARD BASE ───────────────────────────────────────────── */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    transition: all var(--trans);
-    position: relative; overflow: hidden;
-  }
-  .card::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: var(--card-glow);
-    opacity: 0;
-    transition: opacity var(--trans);
-    pointer-events: none;
-  }
-  .card:hover::before { opacity: 1; }
-  .card-title {
-    font-family: var(--font-head);
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 2px; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 20px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .card-title::before {
-    content: '';
-    width: 3px; height: 14px;
-    background: var(--accent);
-    border-radius: 2px; flex-shrink: 0;
-  }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
 
-  /* ── TANK CARD ───────────────────────────────────────────── */
-  .tank-card {
-    grid-column: 1;
-    grid-row: 1 / 3;
-  }
-  .tank-visual {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 20px; margin: 8px 0 24px;
-  }
-  .tank-container {
-    position: relative;
-    width: 140px; height: 220px;
-  }
-  .tank-shell {
-    position: absolute; inset: 0;
-    border: 2px solid var(--accent);
-    border-top: none;
-    border-radius: 0 0 20px 20px;
-    overflow: hidden;
-  }
-  .tank-top {
-    position: absolute; top: -2px; left: -2px; right: -2px;
-    height: 12px;
-    border: 2px solid var(--accent);
-    border-bottom: none;
-    border-radius: 4px 4px 0 0;
-  }
-  .tank-water {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    background: linear-gradient(180deg, rgba(0,212,255,0.6) 0%, rgba(0,153,187,0.8) 100%);
-    transition: height 1.2s cubic-bezier(.4,0,.2,1);
-    border-radius: 0 0 18px 18px;
-  }
-  .tank-water::after {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 6px;
-    background: linear-gradient(90deg,
-      transparent 0%, rgba(255,255,255,0.4) 30%,
-      rgba(255,255,255,0.2) 60%, transparent 100%);
-    animation: wave 3s ease-in-out infinite;
-  }
-  @keyframes wave {
-    0%,100% { transform: translateX(-10px); }
-    50%      { transform: translateX(10px); }
-  }
-  .tank-grid {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; justify-content: space-between;
-    padding: 8px 0;
-    pointer-events: none;
-  }
-  .tank-tick {
-    display: flex; align-items: center;
-    width: 100%; padding: 0 8px;
-    font-size: 9px; color: var(--muted); font-family: var(--font-mono);
-    gap: 4px;
-  }
-  .tank-tick-line { flex: 1; height: 1px; background: var(--border); }
-  .tank-pct-label {
-    font-family: var(--font-head);
-    font-size: 52px; font-weight: 800;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--accent), var(--green));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .tank-pct-label sup { font-size: 22px; vertical-align: super; }
+    .logo span {
+      color: var(--accent);
+    }
 
-  /* Stats row */
-  .tank-stats {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-top: 4px;
-  }
-  .stat-box {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px;
-    text-align: center;
-  }
-  .stat-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; }
-  .stat-value { font-size: 20px; font-weight: 700; color: var(--text); }
-  .stat-unit  { font-size: 11px; color: var(--muted); margin-left: 2px; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
 
-  /* Alert banner */
-  .alert-banner {
-    display: none;
-    align-items: center; gap: 10px;
-    padding: 10px 14px;
-    background: rgba(255,77,106,0.12);
-    border: 1px solid rgba(255,77,106,0.4);
-    border-radius: 10px; margin-top: 14px;
-    font-size: 12px; color: var(--red);
-    animation: alertPulse 2s infinite;
-  }
-  .alert-banner.visible { display: flex; }
-  @keyframes alertPulse {
-    0%,100% { border-color: rgba(255,77,106,0.4); }
-    50%      { border-color: rgba(255,77,106,0.9); }
-  }
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      background: var(--bg3);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
 
-  /* ── SWITCHES CARD ───────────────────────────────────────── */
-  .switches-card {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  .switches-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .switch-item {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px;
-    display: flex; flex-direction: column; gap: 14px;
-    transition: all var(--trans);
-    cursor: pointer;
-  }
-  .switch-item:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .switch-item.on { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.05); }
-  .switch-top { display: flex; justify-content: space-between; align-items: flex-start; }
-  .switch-icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    background: var(--bg2); border: 1px solid var(--border);
-    transition: all var(--trans);
-  }
-  .switch-item.on .switch-icon { background: rgba(0,229,160,0.15); border-color: rgba(0,229,160,0.4); }
-  .switch-name {
-    font-family: var(--font-head); font-size: 15px; font-weight: 600;
-  }
-  .switch-status { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .switch-item.on .switch-status { color: var(--green); }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
 
-  /* Toggle */
-  .toggle {
-    width: 52px; height: 28px;
-    background: var(--bg); border: 2px solid var(--border);
-    border-radius: 100px; position: relative;
-    cursor: pointer; transition: all var(--trans);
-    flex-shrink: 0;
-  }
-  .toggle.on { background: var(--green); border-color: var(--green); }
-  .toggle::after {
-    content: '';
-    position: absolute; top: 3px; left: 3px;
-    width: 18px; height: 18px; border-radius: 50%;
-    background: var(--muted); transition: all var(--trans);
-  }
-  .toggle.on::after { left: calc(100% - 21px); background: #000; }
+    @keyframes pulse {
 
-  /* ── INFO ROW ────────────────────────────────────────────── */
-  .info-card {
-    grid-column: 2;
-    grid-row: 2;
-    display: flex; gap: 12px; padding: 16px 20px;
-    align-items: center;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .info-item {
-    display: flex; align-items: center; gap: 10px;
-    flex: 1; padding: 0 12px;
-    border-right: 1px solid var(--border);
-  }
-  .info-item:last-child { border-right: none; }
-  .info-icon { font-size: 20px; flex-shrink: 0; }
-  .info-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .info-val   { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 1px; }
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
 
-  /* ── CHARTS ──────────────────────────────────────────────── */
-  .charts-row {
-    grid-column: 1 / -1;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  .chart-wrap { position: relative; height: 220px; }
+      50% {
+        opacity: .6;
+        transform: scale(1.3);
+      }
+    }
 
-  /* ── LAST UPDATE ─────────────────────────────────────────── */
-  .footer-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    padding: 10px 32px;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 11px; color: var(--muted);
-  }
-  .footer-left { display: flex; align-items: center; gap: 16px; }
+    /* Theme toggle */
+    .theme-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--trans);
+    }
 
-  /* ── LOGIN OVERLAY ───────────────────────────────────────── */
-  .overlay {
-    position: fixed; inset: 0; z-index: 1000;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .login-box {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 20px; padding: 40px;
-    width: 380px; text-align: center;
-  }
-  .login-logo {
-    font-family: var(--font-head); font-size: 28px; font-weight: 800;
-    margin-bottom: 8px;
-  }
-  .login-logo span { color: var(--accent); }
-  .login-sub { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
-  .login-field {
-    width: 100%; padding: 12px 16px;
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--text);
-    font-family: var(--font-mono); font-size: 13px;
-    margin-bottom: 12px; outline: none;
-    transition: border-color var(--trans);
-  }
-  .login-field:focus { border-color: var(--accent); }
-  .login-btn {
-    width: 100%; padding: 14px;
-    background: linear-gradient(135deg, var(--accent), var(--green));
-    border: none; border-radius: 10px;
-    color: #000; font-family: var(--font-head);
-    font-size: 15px; font-weight: 800;
-    cursor: pointer; margin-top: 8px;
-    transition: all var(--trans); letter-spacing: 0.5px;
-  }
-  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,255,0.3); }
-  .login-err { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+    .theme-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
 
-  /* Loading spinner */
-  .loading {
-    display: none; flex-direction: column; align-items: center; gap: 16px;
-    padding: 40px;
-  }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+    /* Refresh btn */
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--trans);
+      letter-spacing: 0.5px;
+    }
 
-  /* Responsive */
-  @media (max-width: 900px) {
-    main { grid-template-columns: 1fr; }
-    .tank-card { grid-row: auto; }
-    .switches-card, .info-card { grid-column: 1; grid-row: auto; }
-    .charts-row { grid-template-columns: 1fr; }
-  }
-</style>
+    .refresh-btn:hover {
+      background: var(--green);
+      transform: translateY(-1px);
+    }
+
+    .refresh-btn.spinning svg {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── MAIN GRID ───────────────────────────────────────────── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      grid-template-rows: auto auto 1fr;
+      gap: 20px;
+    }
+
+    /* ── CARD BASE ───────────────────────────────────────────── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: all var(--trans);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-glow);
+      opacity: 0;
+      transition: opacity var(--trans);
+      pointer-events: none;
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ── TANK CARD ───────────────────────────────────────────── */
+    .tank-card {
+      grid-column: 1;
+      grid-row: 1 / 3;
+    }
+
+    .tank-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin: 8px 0 24px;
+    }
+
+    .tank-container {
+      position: relative;
+      width: 140px;
+      height: 220px;
+    }
+
+    .tank-shell {
+      position: absolute;
+      inset: 0;
+      border: 2px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 20px 20px;
+      overflow: hidden;
+    }
+
+    .tank-top {
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      height: 12px;
+      border: 2px solid var(--accent);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .tank-water {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(0, 212, 255, 0.6) 0%, rgba(0, 153, 187, 0.8) 100%);
+      transition: height 1.2s cubic-bezier(.4, 0, .2, 1);
+      border-radius: 0 0 18px 18px;
+    }
+
+    .tank-water::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg,
+          transparent 0%, rgba(255, 255, 255, 0.4) 30%,
+          rgba(255, 255, 255, 0.2) 60%, transparent 100%);
+      animation: wave 3s ease-in-out infinite;
+    }
+
+    @keyframes wave {
+
+      0%,
+      100% {
+        transform: translateX(-10px);
+      }
+
+      50% {
+        transform: translateX(10px);
+      }
+    }
+
+    .tank-grid {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px 0;
+      pointer-events: none;
+    }
+
+    .tank-tick {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0 8px;
+      font-size: 9px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      gap: 4px;
+    }
+
+    .tank-tick-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .tank-pct-label {
+      font-family: var(--font-head);
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tank-pct-label sup {
+      font-size: 22px;
+      vertical-align: super;
+    }
+
+    /* Stats row */
+    .tank-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .stat-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-unit {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+
+    /* Alert banner */
+    .alert-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255, 77, 106, 0.12);
+      border: 1px solid rgba(255, 77, 106, 0.4);
+      border-radius: 10px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--red);
+      animation: alertPulse 2s infinite;
+    }
+
+    .alert-banner.visible {
+      display: flex;
+    }
+
+    @keyframes alertPulse {
+
+      0%,
+      100% {
+        border-color: rgba(255, 77, 106, 0.4);
+      }
+
+      50% {
+        border-color: rgba(255, 77, 106, 0.9);
+      }
+    }
+
+    /* ── SWITCHES CARD ───────────────────────────────────────── */
+    .switches-card {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .switches-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .switch-item {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: all var(--trans);
+      cursor: pointer;
+    }
+
+    .switch-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .switch-item.on {
+      border-color: rgba(0, 229, 160, 0.4);
+      background: rgba(0, 229, 160, 0.05);
+    }
+
+    .switch-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .switch-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      transition: all var(--trans);
+    }
+
+    .switch-item.on .switch-icon {
+      background: rgba(0, 229, 160, 0.15);
+      border-color: rgba(0, 229, 160, 0.4);
+    }
+
+    .switch-name {
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .switch-status {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .switch-item.on .switch-status {
+      color: var(--green);
+    }
+
+    /* Toggle */
+    .toggle {
+      width: 52px;
+      height: 28px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 100px;
+      position: relative;
+      cursor: pointer;
+      transition: all var(--trans);
+      flex-shrink: 0;
+    }
+
+    .toggle.on {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: all var(--trans);
+    }
+
+    .toggle.on::after {
+      left: calc(100% - 21px);
+      background: #000;
+    }
+
+    /* ── INFO ROW ────────────────────────────────────────────── */
+    .info-card {
+      grid-column: 2;
+      grid-row: 2;
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      padding: 0 12px;
+      border-right: 1px solid var(--border);
+    }
+
+    .info-item:last-child {
+      border-right: none;
+    }
+
+    .info-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .info-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .info-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 1px;
+    }
+
+    /* ── CHARTS ──────────────────────────────────────────────── */
+    .charts-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 220px;
+    }
+
+    /* ── LAST UPDATE ─────────────────────────────────────────── */
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 10px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* ── LOGIN OVERLAY ───────────────────────────────────────── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 380px;
+      text-align: center;
+    }
+
+    .login-logo {
+      font-family: var(--font-head);
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .login-logo span {
+      color: var(--accent);
+    }
+
+    .login-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
+
+    .login-field {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color var(--trans);
+    }
+
+    .login-field:focus {
+      border-color: var(--accent);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all var(--trans);
+      letter-spacing: 0.5px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+    }
+
+    .login-err {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .tank-card {
+        grid-row: auto;
+      }
+
+      .switches-card,
+      .info-card {
+        grid-column: 1;
+        grid-row: auto;
+      }
+
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- LOGIN OVERLAY -->
-<div class="overlay" id="overlay">
-  <div class="login-box">
-    <div class="login-logo">Aqua<span>Control</span></div>
-    <div class="login-sub">ESP RainMaker Dashboard</div>
-    <div id="loginForm">
-      <!-- Tabs -->
-      <div style="display:flex;gap:8px;margin-bottom:20px">
-        <button onclick="switchTab('login')" id="tabLogin"
-          style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#000;font-family:var(--font-mono);font-size:12px;cursor:pointer;font-weight:700">
-          EMAIL / ПАРОЛЬ
-        </button>
-        <button onclick="switchTab('token')" id="tabToken"
-          style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-mono);font-size:12px;cursor:pointer">
-          ТОКЕН
-        </button>
-      </div>
-      <!-- Login tab -->
-      <div id="panelLogin">
-        <input class="login-field" type="email" id="emailInput" placeholder="Email (RainMaker акаунт)">
-        <input class="login-field" type="password" id="passInput" placeholder="Пароль">
-        <button class="login-btn" onclick="doLogin()">УВІЙТИ</button>
-        <div class="login-err" id="loginErr">Невірний email або пароль</div>
-      </div>
-      <!-- Token tab -->
-      <div id="panelToken" style="display:none">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-align:left">
-          Отримай токен з dashboard.rainmaker.espressif.com →<br>DevTools → Network → будь-який запит → Headers → Authorization
+  <!-- LOGIN OVERLAY -->
+  <div class="overlay" id="overlay">
+    <div class="login-box">
+      <div class="login-logo">Aqua<span>Control</span></div>
+      <div class="login-sub">ESP RainMaker Dashboard</div>
+      <div id="loginForm">
+        <!-- Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <button onclick="switchTab('login')" id="tabLogin"
+            style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#000;font-family:var(--font-mono);font-size:12px;cursor:pointer;font-weight:700">
+            EMAIL / ПАРОЛЬ
+          </button>
+          <button onclick="switchTab('token')" id="tabToken"
+            style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-mono);font-size:12px;cursor:pointer">
+            ТОКЕН
+          </button>
         </div>
-        <textarea class="login-field" id="tokenInput" placeholder="Встав токен сюди (eyJ...)"
-          style="height:100px;resize:vertical;line-height:1.4"></textarea>
-        <button class="login-btn" onclick="doTokenLogin()">ПІДКЛЮЧИТИСЬ</button>
-        <div class="login-err" id="tokenErr">Невірний токен</div>
+        <!-- Login tab -->
+        <div id="panelLogin">
+          <input class="login-field" type="email" id="emailInput" placeholder="Email (RainMaker акаунт)">
+          <input class="login-field" type="password" id="passInput" placeholder="Пароль">
+          <button class="login-btn" onclick="doLogin()">УВІЙТИ</button>
+          <div class="login-err" id="loginErr">Невірний email або пароль</div>
+        </div>
+        <!-- Token tab -->
+        <div id="panelToken" style="display:none">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-align:left">
+            Отримай токен з dashboard.rainmaker.espressif.com →<br>DevTools → Network → будь-який запит → Headers →
+            Authorization
+          </div>
+          <textarea class="login-field" id="tokenInput" placeholder="Встав токен сюди (eyJ...)"
+            style="height:100px;resize:vertical;line-height:1.4"></textarea>
+          <button class="login-btn" onclick="doTokenLogin()">ПІДКЛЮЧИТИСЬ</button>
+          <div class="login-err" id="tokenErr">Невірний токен</div>
+        </div>
+      </div>
+      <div class="loading" id="loadingDiv">
+        <div class="spinner"></div>
+        <div style="color:var(--muted);font-size:13px">Підключення до RainMaker...</div>
       </div>
     </div>
-    <div class="loading" id="loadingDiv">
-      <div class="spinner"></div>
-      <div style="color:var(--muted);font-size:13px">Підключення до RainMaker...</div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">💧</div>
+      Aqua<span>Control</span>
     </div>
-  </div>
-</div>
-
-<!-- HEADER -->
-<header>
-  <div class="logo">
-    <div class="logo-icon">💧</div>
-    Aqua<span>Control</span>
-  </div>
-  <div class="header-right">
-    <div class="status-pill">
-      <div class="status-dot"></div>
-      <span id="connStatus">Онлайн</span>
+    <div class="header-right">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span id="connStatus">Онлайн</span>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" title="Тема">🌙</button>
+      <button class="refresh-btn" id="refreshBtn" onclick="fetchData()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M1 4v6h6M23 20v-6h-6" />
+          <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+        </svg>
+        ОНОВИТИ
+      </button>
     </div>
-    <button class="theme-btn" onclick="toggleTheme()" title="Тема">🌙</button>
-    <button class="refresh-btn" id="refreshBtn" onclick="fetchData()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
-      </svg>
-      ОНОВИТИ
-    </button>
-  </div>
-</header>
+  </header>
 
-<!-- MAIN -->
-<main>
+  <!-- MAIN -->
+  <main>
 
-  <!-- TANK CARD -->
-  <div class="card tank-card">
-    <div class="card-title">💧 WaterTank</div>
-    <div class="tank-visual">
-      <div class="tank-container">
-        <div class="tank-top"></div>
-        <div class="tank-shell">
-          <div class="tank-water" id="tankWater" style="height:0%"></div>
-          <div class="tank-grid">
-            <div class="tank-tick"><span>100%</span><div class="tank-tick-line"></div></div>
-            <div class="tank-tick"><span>75%</span><div class="tank-tick-line"></div></div>
-            <div class="tank-tick"><span>50%</span><div class="tank-tick-line"></div></div>
-            <div class="tank-tick"><span>25%</span><div class="tank-tick-line"></div></div>
-            <div class="tank-tick"><span>0%</span><div class="tank-tick-line"></div></div>
+    <!-- TANK CARD -->
+    <div class="card tank-card">
+      <div class="card-title">💧 WaterTank</div>
+      <div class="tank-visual">
+        <div class="tank-container">
+          <div class="tank-top"></div>
+          <div class="tank-shell">
+            <div class="tank-water" id="tankWater" style="height:0%"></div>
+            <div class="tank-grid">
+              <div class="tank-tick"><span>100%</span>
+                <div class="tank-tick-line"></div>
+              </div>
+              <div class="tank-tick"><span>75%</span>
+                <div class="tank-tick-line"></div>
+              </div>
+              <div class="tank-tick"><span>50%</span>
+                <div class="tank-tick-line"></div>
+              </div>
+              <div class="tank-tick"><span>25%</span>
+                <div class="tank-tick-line"></div>
+              </div>
+              <div class="tank-tick"><span>0%</span>
+                <div class="tank-tick-line"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tank-pct-label"><span id="levelPct">—</span><sup>%</sup></div>
+      </div>
+
+      <div class="tank-stats">
+        <div class="stat-box">
+          <div class="stat-label">Вода</div>
+          <div><span class="stat-value" id="waterL">—</span><span class="stat-unit">л</span></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Відстань</div>
+          <div><span class="stat-value" id="distCm">—</span><span class="stat-unit">см</span></div>
+        </div>
+      </div>
+
+      <div class="alert-banner" id="alertBanner">
+        ⚠️ Низький рівень води!
+      </div>
+
+      <div style="margin-top:16px">
+        <div class="stat-label" style="margin-bottom:8px">Останнє оновлення</div>
+        <div style="font-size:13px;color:var(--accent)" id="lastUpdate">—</div>
+      </div>
+      <div style="margin-top:8px">
+        <div class="stat-label" style="margin-bottom:4px">Прошивка</div>
+        <div style="font-size:12px;color:var(--muted)" id="fwVersion">—</div>
+      </div>
+    </div>
+
+    <!-- SWITCHES CARD -->
+    <div class="card switches-card">
+      <div class="card-title">⚡ Перемикачі</div>
+      <div class="switches-grid">
+        <div class="switch-item" id="sw1Card">
+          <div class="switch-top">
+            <div class="switch-icon" id="sw1Icon">🔌</div>
+            <div class="toggle" id="sw1Toggle" onclick="toggleSwitch(1)"></div>
+          </div>
+          <div>
+            <div class="switch-name">Obuvnitsa</div>
+            <div class="switch-status" id="sw1Status">Вимкнено</div>
+          </div>
+        </div>
+        <div class="switch-item" id="sw2Card">
+          <div class="switch-top">
+            <div class="switch-icon" id="sw2Icon">🔌</div>
+            <div class="toggle" id="sw2Toggle" onclick="toggleSwitch(2)"></div>
+          </div>
+          <div>
+            <div class="switch-name">Vana</div>
+            <div class="switch-status" id="sw2Status">Вимкнено</div>
           </div>
         </div>
       </div>
-      <div class="tank-pct-label"><span id="levelPct">—</span><sup>%</sup></div>
     </div>
 
-    <div class="tank-stats">
-      <div class="stat-box">
-        <div class="stat-label">Вода</div>
-        <div><span class="stat-value" id="waterL">—</span><span class="stat-unit">л</span></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Відстань</div>
-        <div><span class="stat-value" id="distCm">—</span><span class="stat-unit">см</span></div>
-      </div>
-    </div>
-
-    <div class="alert-banner" id="alertBanner">
-      ⚠️ Низький рівень води!
-    </div>
-
-    <div style="margin-top:16px">
-      <div class="stat-label" style="margin-bottom:8px">Останнє оновлення</div>
-      <div style="font-size:13px;color:var(--accent)" id="lastUpdate">—</div>
-    </div>
-    <div style="margin-top:8px">
-      <div class="stat-label" style="margin-bottom:4px">Прошивка</div>
-      <div style="font-size:12px;color:var(--muted)" id="fwVersion">—</div>
-    </div>
-  </div>
-
-  <!-- SWITCHES CARD -->
-  <div class="card switches-card">
-    <div class="card-title">⚡ Перемикачі</div>
-    <div class="switches-grid">
-      <div class="switch-item" id="sw1Card">
-        <div class="switch-top">
-          <div class="switch-icon" id="sw1Icon">🔌</div>
-          <div class="toggle" id="sw1Toggle" onclick="toggleSwitch(1)"></div>
-        </div>
+    <!-- INFO ROW -->
+    <div class="info-card">
+      <div class="info-item">
+        <div class="info-icon">📶</div>
         <div>
-          <div class="switch-name">Switch 1</div>
-          <div class="switch-status" id="sw1Status">Вимкнено</div>
+          <div class="info-label">Статус</div>
+          <div class="info-val" id="nodeStatus">—</div>
         </div>
       </div>
-      <div class="switch-item" id="sw2Card">
-        <div class="switch-top">
-          <div class="switch-icon" id="sw2Icon">🔌</div>
-          <div class="toggle" id="sw2Toggle" onclick="toggleSwitch(2)"></div>
-        </div>
+      <div class="info-item">
+        <div class="info-icon">🌡️</div>
         <div>
-          <div class="switch-name">Switch 2</div>
-          <div class="switch-status" id="sw2Status">Вимкнено</div>
+          <div class="info-label">Залишок</div>
+          <div class="info-val"><span id="pctRemain">—</span>%</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">⏱️</div>
+        <div>
+          <div class="info-label">Оновлення</div>
+          <div class="info-val" id="refreshInterval">5 сек</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">🕐</div>
+        <div>
+          <div class="info-label">Час</div>
+          <div class="info-val" id="currentTime">—</div>
         </div>
       </div>
     </div>
+
+    <!-- CHARTS -->
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title">📈 Рівень води (%) — остання година</div>
+        <div class="chart-wrap">
+          <canvas id="levelChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">💧 Об'єм води (л) — остання година</div>
+        <div class="chart-wrap">
+          <canvas id="volumeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <div class="footer-bar" style="padding-bottom: max(10px, env(safe-area-inset-bottom))">
+    <div class="footer-left">
+      <span>AquaControl v1.0</span>
+      <span>•</span>
+      <span id="footerUpdate">Ще не оновлювалось</span>
+    </div>
+    <div>ESP RainMaker Dashboard</div>
   </div>
 
-  <!-- INFO ROW -->
-  <div class="info-card">
-    <div class="info-item">
-      <div class="info-icon">📶</div>
-      <div>
-        <div class="info-label">Статус</div>
-        <div class="info-val" id="nodeStatus">—</div>
-      </div>
-    </div>
-    <div class="info-item">
-      <div class="info-icon">🌡️</div>
-      <div>
-        <div class="info-label">Залишок</div>
-        <div class="info-val"><span id="pctRemain">—</span>%</div>
-      </div>
-    </div>
-    <div class="info-item">
-      <div class="info-icon">⏱️</div>
-      <div>
-        <div class="info-label">Оновлення</div>
-        <div class="info-val" id="refreshInterval">5 сек</div>
-      </div>
-    </div>
-    <div class="info-item">
-      <div class="info-icon">🕐</div>
-      <div>
-        <div class="info-label">Час</div>
-        <div class="info-val" id="currentTime">—</div>
-      </div>
-    </div>
-  </div>
+  <script>
+    // ── CONFIG ────────────────────────────────────────────────────
+    const API = 'https://api.rainmaker.espressif.com/v1';
+    const AUTO_REFRESH_SEC = 15;
 
-  <!-- CHARTS -->
-  <div class="charts-row">
-    <div class="card">
-      <div class="card-title">📈 Рівень води (%)  — остання година</div>
-      <div class="chart-wrap">
-        <canvas id="levelChart"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">💧 Об'єм води (л)  — остання година</div>
-      <div class="chart-wrap">
-        <canvas id="volumeChart"></canvas>
-      </div>
-    </div>
-  </div>
+    let token = null;
+    let nodeId = null;
+    let sw1State = false;
+    let sw2State = false;
+    let refreshTimer = null;
 
-</main>
+    // Chart history
+    const MAX_POINTS = 20;
+    let levelHistory = [];
+    let volumeHistory = [];
+    let timeLabels = [];
 
-<!-- FOOTER -->
-<div class="footer-bar" style="padding-bottom: max(10px, env(safe-area-inset-bottom))">
-  <div class="footer-left">
-    <span>AquaControl v1.0</span>
-    <span>•</span>
-    <span id="footerUpdate">Ще не оновлювалось</span>
-  </div>
-  <div>ESP RainMaker Dashboard</div>
-</div>
+    // ── THEME ─────────────────────────────────────────────────────
+    let isDark = true;
 
-<script>
-// ── CONFIG ────────────────────────────────────────────────────
-const API = 'https://api.rainmaker.espressif.com/v1';
-const AUTO_REFRESH_SEC = 15;
+    function toggleTheme() {
+      isDark = !isDark;
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.querySelector('.theme-btn').textContent = isDark ? '🌙' : '☀️';
+      updateChartTheme();
+    }
 
-let token = null;
-let nodeId = null;
-let sw1State = false;
-let sw2State = false;
-let refreshTimer = null;
+    // ── CLOCK ─────────────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('currentTime').textContent =
+        now.toLocaleTimeString('uk-UA', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-// Chart history
-const MAX_POINTS = 20;
-let levelHistory = [];
-let volumeHistory = [];
-let timeLabels   = [];
+    // ── LOGIN ─────────────────────────────────────────────────────
+    async function doLogin() {
+      const email = document.getElementById('emailInput').value.trim();
+      const pass = document.getElementById('passInput').value;
+      if (!email || !pass) return;
 
-// ── THEME ─────────────────────────────────────────────────────
-let isDark = true;
-function toggleTheme() {
-  isDark = !isDark;
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  document.querySelector('.theme-btn').textContent = isDark ? '🌙' : '☀️';
-  updateChartTheme();
-}
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('loadingDiv').style.display = 'flex';
 
-// ── CLOCK ─────────────────────────────────────────────────────
-function updateClock() {
-  const now = new Date();
-  document.getElementById('currentTime').textContent =
-    now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-setInterval(updateClock, 1000);
-updateClock();
+      try {
+        const res = await fetch(`${API}/login2`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_name: email,
+            password: pass
+          })
+        });
+        const data = await res.json();
 
-// ── LOGIN ─────────────────────────────────────────────────────
-async function doLogin() {
-  const email = document.getElementById('emailInput').value.trim();
-  const pass  = document.getElementById('passInput').value;
-  if (!email || !pass) return;
+        if (data.status === 'success') {
+          token = data.accesstoken || data.idtoken;
+          document.getElementById('overlay').style.display = 'none';
+          await getNodeId();
+          startAutoRefresh();
+        } else {
+          throw new Error('Auth failed');
+        }
+      } catch {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('loadingDiv').style.display = 'none';
+        document.getElementById('loginErr').style.display = 'block';
+      }
+    }
 
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('loadingDiv').style.display = 'flex';
+    // ── TAB SWITCHING ────────────────────────────────────────────
+    function switchTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('panelLogin').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('panelToken').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('tabLogin').style.background = isLogin ? 'var(--accent)' : 'transparent';
+      document.getElementById('tabLogin').style.color = isLogin ? '#000' : 'var(--muted)';
+      document.getElementById('tabLogin').style.borderColor = isLogin ? 'var(--accent)' : 'var(--border)';
+      document.getElementById('tabToken').style.background = isLogin ? 'transparent' : 'var(--accent)';
+      document.getElementById('tabToken').style.color = isLogin ? 'var(--muted)' : '#000';
+      document.getElementById('tabToken').style.borderColor = isLogin ? 'var(--border)' : 'var(--accent)';
+    }
 
-  try {
-    const res = await fetch(`${API}/login2`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_name: email, password: pass })
-    });
-    const data = await res.json();
-
-    if (data.status === 'success') {
-      token = data.accesstoken || data.idtoken;
+    // ── TOKEN LOGIN ───────────────────────────────────────────────
+    async function doTokenLogin() {
+      const t = document.getElementById('tokenInput').value.trim();
+      if (!t) return;
+      token = t;
       document.getElementById('overlay').style.display = 'none';
       await getNodeId();
       startAutoRefresh();
-    } else {
-      throw new Error('Auth failed');
     }
-  } catch {
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('loadingDiv').style.display = 'none';
-    document.getElementById('loginErr').style.display = 'block';
-  }
-}
 
-// ── TAB SWITCHING ────────────────────────────────────────────
-function switchTab(tab) {
-  const isLogin = tab === 'login';
-  document.getElementById('panelLogin').style.display = isLogin ? 'block' : 'none';
-  document.getElementById('panelToken').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('tabLogin').style.background = isLogin ? 'var(--accent)' : 'transparent';
-  document.getElementById('tabLogin').style.color = isLogin ? '#000' : 'var(--muted)';
-  document.getElementById('tabLogin').style.borderColor = isLogin ? 'var(--accent)' : 'var(--border)';
-  document.getElementById('tabToken').style.background = isLogin ? 'transparent' : 'var(--accent)';
-  document.getElementById('tabToken').style.color = isLogin ? 'var(--muted)' : '#000';
-  document.getElementById('tabToken').style.borderColor = isLogin ? 'var(--border)' : 'var(--accent)';
-}
-
-// ── TOKEN LOGIN ───────────────────────────────────────────────
-async function doTokenLogin() {
-  const t = document.getElementById('tokenInput').value.trim();
-  if (!t) return;
-  token = t;
-  document.getElementById('overlay').style.display = 'none';
-  await getNodeId();
-  startAutoRefresh();
-}
-
-// ── GET NODE ID ───────────────────────────────────────────────
-async function getNodeId() {
-  try {
-    const res = await fetch(`${API}/user/nodes`, {
-      headers: { Authorization: token }
-    });
-    const data = await res.json();
-    if (data.nodes && data.nodes.length > 0) {
-      nodeId = data.nodes[0];
-      document.getElementById('nodeStatus').textContent = 'Онлайн';
+    // ── GET NODE ID ───────────────────────────────────────────────
+    async function getNodeId() {
+      try {
+        const res = await fetch(`${API}/user/nodes`, {
+          headers: {
+            Authorization: token
+          }
+        });
+        const data = await res.json();
+        if (data.nodes && data.nodes.length > 0) {
+          nodeId = data.nodes[0];
+          document.getElementById('nodeStatus').textContent = 'Онлайн';
+        }
+      } catch {
+        console.error('Node fetch error');
+      }
+      await fetchData();
     }
-  } catch { console.error('Node fetch error'); }
-  await fetchData();
-}
 
-// ── FETCH DATA ────────────────────────────────────────────────
-async function fetchData() {
-  if (!token || !nodeId) return;
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
+    // ── FETCH DATA ────────────────────────────────────────────────
+    async function fetchData() {
+      if (!token || !nodeId) return;
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('spinning');
 
-  try {
-    const res = await fetch(`${API}/user/nodes/params?node_id=${nodeId}`, {
-      headers: { Authorization: token }
-    });
-    const data = await res.json();
+      try {
+        const res = await fetch(`${API}/user/nodes/params?node_id=${nodeId}`, {
+          headers: {
+            Authorization: token
+          }
+        });
+        const data = await res.json();
 
-    if (data.node_details && data.node_details.length > 0) {
-      const node = data.node_details[0];
-      const params = node.params || {};
-      updateUI(params);
+        if (data.node_details && data.node_details.length > 0) {
+          const node = data.node_details[0];
+          const params = node.params || {};
+          updateUI(params);
+        }
+      } catch (e) {
+        console.error('Fetch error', e);
+        document.getElementById('nodeStatus').textContent = 'Офлайн';
+      }
+
+      btn.classList.remove('spinning');
+      const now = new Date().toLocaleTimeString('uk-UA');
+      document.getElementById('footerUpdate').textContent = `Оновлено: ${now}`;
     }
-  } catch (e) {
-    console.error('Fetch error', e);
-    document.getElementById('nodeStatus').textContent = 'Офлайн';
-  }
 
-  btn.classList.remove('spinning');
-  const now = new Date().toLocaleTimeString('uk-UA');
-  document.getElementById('footerUpdate').textContent = `Оновлено: ${now}`;
-}
+    // ── UPDATE UI ─────────────────────────────────────────────────
+    function updateUI(params) {
+      // WaterTank
+      const tank = params['WaterTank'] || {};
+      const level = tank['Level %'] ? ? null;
+      const liters = tank['Water L'] ? ? null;
+      const dist = tank['Distance cm'] ? ? null;
+      const alert = tank['LowAlert'] ? ? false;
+      const lastUpd = tank['Last Update'] ? ? '—';
+      const fw = tank['Firmware'] ? ? '—';
 
-// ── UPDATE UI ─────────────────────────────────────────────────
-function updateUI(params) {
-  // WaterTank
-  const tank = params['WaterTank'] || {};
-  const level   = tank['Level %']     ?? null;
-  const liters  = tank['Water L']     ?? null;
-  const dist    = tank['Distance cm'] ?? null;
-  const alert   = tank['LowAlert']    ?? false;
-  const lastUpd = tank['Last Update'] ?? '—';
-  const fw      = tank['Firmware']    ?? '—';
+      if (level !== null) {
+        document.getElementById('levelPct').textContent = Math.round(level);
+        document.getElementById('pctRemain').textContent = Math.round(level);
+        document.getElementById('tankWater').style.height = Math.round(level) + '%';
 
-  if (level !== null) {
-    document.getElementById('levelPct').textContent  = Math.round(level);
-    document.getElementById('pctRemain').textContent = Math.round(level);
-    document.getElementById('tankWater').style.height = Math.round(level) + '%';
+        // Water color by level
+        const w = document.getElementById('tankWater');
+        if (level <= 20) {
+          w.style.background = 'linear-gradient(180deg, rgba(255,77,106,0.7) 0%, rgba(200,30,60,0.9) 100%)';
+        } else if (level <= 40) {
+          w.style.background = 'linear-gradient(180deg, rgba(255,209,102,0.7) 0%, rgba(200,160,30,0.9) 100%)';
+        } else {
+          w.style.background = 'linear-gradient(180deg, rgba(0,212,255,0.6) 0%, rgba(0,153,187,0.8) 100%)';
+        }
+      }
+      if (liters !== null) document.getElementById('waterL').textContent = liters.toFixed(1);
+      if (dist !== null) document.getElementById('distCm').textContent = dist.toFixed(1);
+      document.getElementById('lastUpdate').textContent = lastUpd;
+      document.getElementById('fwVersion').textContent = 'v' + fw;
 
-    // Water color by level
-    const w = document.getElementById('tankWater');
-    if (level <= 20) {
-      w.style.background = 'linear-gradient(180deg, rgba(255,77,106,0.7) 0%, rgba(200,30,60,0.9) 100%)';
-    } else if (level <= 40) {
-      w.style.background = 'linear-gradient(180deg, rgba(255,209,102,0.7) 0%, rgba(200,160,30,0.9) 100%)';
-    } else {
-      w.style.background = 'linear-gradient(180deg, rgba(0,212,255,0.6) 0%, rgba(0,153,187,0.8) 100%)';
-    }
-  }
-  if (liters !== null) document.getElementById('waterL').textContent   = liters.toFixed(1);
-  if (dist   !== null) document.getElementById('distCm').textContent   = dist.toFixed(1);
-  document.getElementById('lastUpdate').textContent = lastUpd;
-  document.getElementById('fwVersion').textContent  = 'v' + fw;
+      // Alert
+      const banner = document.getElementById('alertBanner');
+      alert ? banner.classList.add('visible') : banner.classList.remove('visible');
 
-  // Alert
-  const banner = document.getElementById('alertBanner');
-  alert ? banner.classList.add('visible') : banner.classList.remove('visible');
+      // Switches
+      const sw1 = (params['Obuvnitsa'] || {})['Power'] ? ? false;
+      const sw2 = (params['Vana'] || {})['Power'] ? ? false;
+      setSwitchUI(1, sw1);
+      setSwitchUI(2, sw2);
+      sw1State = sw1;
+      sw2State = sw2;
 
-  // Switches
-  const sw1 = (params['Obuvnitsa'] || {})['Power'] ?? false;
-  const sw2 = (params['Vana'] || {})['Power'] ?? false;
-  setSwitchUI(1, sw1);
-  setSwitchUI(2, sw2);
-  sw1State = sw1;
-  sw2State = sw2;
-
-  // Charts
-  if (level !== null) {
-    const t = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    timeLabels.push(t);
-    levelHistory.push(Math.round(level));
-    volumeHistory.push(liters !== null ? parseFloat(liters.toFixed(1)) : 0);
-    if (timeLabels.length > MAX_POINTS) {
-      timeLabels.shift(); levelHistory.shift(); volumeHistory.shift();
-    }
-    updateCharts();
-  }
-}
-
-// ── SWITCH UI ─────────────────────────────────────────────────
-function setSwitchUI(n, state) {
-  const card   = document.getElementById(`sw${n}Card`);
-  const toggle = document.getElementById(`sw${n}Toggle`);
-  const status = document.getElementById(`sw${n}Status`);
-  const icon   = document.getElementById(`sw${n}Icon`);
-
-  if (state) {
-    card.classList.add('on');
-    toggle.classList.add('on');
-    status.textContent = 'Увімкнено';
-    icon.textContent = '⚡';
-  } else {
-    card.classList.remove('on');
-    toggle.classList.remove('on');
-    status.textContent = 'Вимкнено';
-    icon.textContent = '🔌';
-  }
-}
-
-// ── TOGGLE SWITCH ─────────────────────────────────────────────
-async function toggleSwitch(n) {
-  if (!token || !nodeId) return;
-  const newState = n === 1 ? !sw1State : !sw2State;
-  const devName  = n === 1 ? 'Obuvnitsa' : 'Vana';
-
-  setSwitchUI(n, newState);
-  if (n === 1) sw1State = newState; else sw2State = newState;
-
-  try {
-    await fetch(`${API}/user/nodes/params`, {
-      method: 'PUT',
-      headers: { Authorization: token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        node_id: nodeId,
-        payload: { [devName]: { Power: newState } }
-      })
-    });
-  } catch (e) { console.error('Switch error', e); }
-}
-
-// ── CHARTS ────────────────────────────────────────────────────
-let levelChart, volumeChart;
-
-function chartDefaults() {
-  return {
-    responsive: true, maintainAspectRatio: false,
-    animation: { duration: 400 },
-    plugins: { legend: { display: false } },
-    scales: {
-      x: {
-        ticks: { color: '#6b7a99', font: { family: 'Space Mono', size: 10 }, maxTicksLimit: 6 },
-        grid: { color: 'rgba(255,255,255,0.05)' }
-      },
-      y: {
-        ticks: { color: '#6b7a99', font: { family: 'Space Mono', size: 10 } },
-        grid: { color: 'rgba(255,255,255,0.05)' }
+      // Charts
+      if (level !== null) {
+        const t = new Date().toLocaleTimeString('uk-UA', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        timeLabels.push(t);
+        levelHistory.push(Math.round(level));
+        volumeHistory.push(liters !== null ? parseFloat(liters.toFixed(1)) : 0);
+        if (timeLabels.length > MAX_POINTS) {
+          timeLabels.shift();
+          levelHistory.shift();
+          volumeHistory.shift();
+        }
+        updateCharts();
       }
     }
-  };
-}
 
-function initCharts() {
-  const ctxL = document.getElementById('levelChart').getContext('2d');
-  const ctxV = document.getElementById('volumeChart').getContext('2d');
+    // ── SWITCH UI ─────────────────────────────────────────────────
+    function setSwitchUI(n, state) {
+      const card = document.getElementById(`sw${n}Card`);
+      const toggle = document.getElementById(`sw${n}Toggle`);
+      const status = document.getElementById(`sw${n}Status`);
+      const icon = document.getElementById(`sw${n}Icon`);
 
-  const gradL = ctxL.createLinearGradient(0,0,0,200);
-  gradL.addColorStop(0, 'rgba(0,212,255,0.4)');
-  gradL.addColorStop(1, 'rgba(0,212,255,0)');
+      if (state) {
+        card.classList.add('on');
+        toggle.classList.add('on');
+        status.textContent = 'Увімкнено';
+        icon.textContent = '⚡';
+      } else {
+        card.classList.remove('on');
+        toggle.classList.remove('on');
+        status.textContent = 'Вимкнено';
+        icon.textContent = '🔌';
+      }
+    }
 
-  const gradV = ctxV.createLinearGradient(0,0,0,200);
-  gradV.addColorStop(0, 'rgba(0,229,160,0.4)');
-  gradV.addColorStop(1, 'rgba(0,229,160,0)');
+    // ── TOGGLE SWITCH ─────────────────────────────────────────────
+    async function toggleSwitch(n) {
+      if (!token || !nodeId) return;
+      const newState = n === 1 ? !sw1State : !sw2State;
+      const devName = n === 1 ? 'Obuvnitsa' : 'Vana';
 
-  levelChart = new Chart(ctxL, {
-    type: 'line',
-    data: {
-      labels: timeLabels,
-      datasets: [{ data: levelHistory, borderColor: '#00d4ff', backgroundColor: gradL,
-        borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#00d4ff',
-        tension: 0.4, fill: true }]
-    },
-    options: { ...chartDefaults(), scales: { ...chartDefaults().scales,
-      y: { ...chartDefaults().scales.y, min: 0, max: 100,
-        ticks: { ...chartDefaults().scales.y.ticks, callback: v => v + '%' } }
-    }}
-  });
+      setSwitchUI(n, newState);
+      if (n === 1) sw1State = newState;
+      else sw2State = newState;
 
-  volumeChart = new Chart(ctxV, {
-    type: 'line',
-    data: {
-      labels: timeLabels,
-      datasets: [{ data: volumeHistory, borderColor: '#00e5a0', backgroundColor: gradV,
-        borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#00e5a0',
-        tension: 0.4, fill: true }]
-    },
-    options: { ...chartDefaults(), scales: { ...chartDefaults().scales,
-      y: { ...chartDefaults().scales.y, min: 0,
-        ticks: { ...chartDefaults().scales.y.ticks, callback: v => v + ' л' } }
-    }}
-  });
-}
+      try {
+        await fetch(`${API}/user/nodes/params`, {
+          method: 'PUT',
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            node_id: nodeId,
+            payload: {
+              [devName]: {
+                Power: newState
+              }
+            }
+          })
+        });
+      } catch (e) {
+        console.error('Switch error', e);
+      }
+    }
 
-function updateCharts() {
-  if (!levelChart || !volumeChart) return;
-  levelChart.data.labels   = [...timeLabels];
-  levelChart.data.datasets[0].data = [...levelHistory];
-  volumeChart.data.labels  = [...timeLabels];
-  volumeChart.data.datasets[0].data = [...volumeHistory];
-  levelChart.update('none');
-  volumeChart.update('none');
-}
+    // ── CHARTS ────────────────────────────────────────────────────
+    let levelChart, volumeChart;
 
-function updateChartTheme() {
-  const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
-  const tickColor = '#6b7a99';
-  [levelChart, volumeChart].forEach(c => {
-    if (!c) return;
-    c.options.scales.x.grid.color = gridColor;
-    c.options.scales.y.grid.color = gridColor;
-    c.options.scales.x.ticks.color = tickColor;
-    c.options.scales.y.ticks.color = tickColor;
-    c.update();
-  });
-}
+    function chartDefaults() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 400
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#6b7a99',
+              font: {
+                family: 'Space Mono',
+                size: 10
+              },
+              maxTicksLimit: 6
+            },
+            grid: {
+              color: 'rgba(255,255,255,0.05)'
+            }
+          },
+          y: {
+            ticks: {
+              color: '#6b7a99',
+              font: {
+                family: 'Space Mono',
+                size: 10
+              }
+            },
+            grid: {
+              color: 'rgba(255,255,255,0.05)'
+            }
+          }
+        }
+      };
+    }
 
-// ── AUTO REFRESH ──────────────────────────────────────────────
-function startAutoRefresh() {
-  if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(fetchData, AUTO_REFRESH_SEC * 1000);
-  document.getElementById('refreshInterval').textContent = AUTO_REFRESH_SEC + ' сек';
-}
+    function initCharts() {
+      const ctxL = document.getElementById('levelChart').getContext('2d');
+      const ctxV = document.getElementById('volumeChart').getContext('2d');
 
-// Enter key login
-document.getElementById('passInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
+      const gradL = ctxL.createLinearGradient(0, 0, 0, 200);
+      gradL.addColorStop(0, 'rgba(0,212,255,0.4)');
+      gradL.addColorStop(1, 'rgba(0,212,255,0)');
 
-// Init charts on load
-initCharts();
-</script>
+      const gradV = ctxV.createLinearGradient(0, 0, 0, 200);
+      gradV.addColorStop(0, 'rgba(0,229,160,0.4)');
+      gradV.addColorStop(1, 'rgba(0,229,160,0)');
+
+      levelChart = new Chart(ctxL, {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [{
+            data: levelHistory,
+            borderColor: '#00d4ff',
+            backgroundColor: gradL,
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#00d4ff',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          ...chartDefaults(),
+          scales: {
+            ...chartDefaults().scales,
+            y: {
+              ...chartDefaults().scales.y,
+              min: 0,
+              max: 100,
+              ticks: {
+                ...chartDefaults().scales.y.ticks,
+                callback: v => v + '%'
+              }
+            }
+          }
+        }
+      });
+
+      volumeChart = new Chart(ctxV, {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [{
+            data: volumeHistory,
+            borderColor: '#00e5a0',
+            backgroundColor: gradV,
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#00e5a0',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          ...chartDefaults(),
+          scales: {
+            ...chartDefaults().scales,
+            y: {
+              ...chartDefaults().scales.y,
+              min: 0,
+              ticks: {
+                ...chartDefaults().scales.y.ticks,
+                callback: v => v + ' л'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateCharts() {
+      if (!levelChart || !volumeChart) return;
+      levelChart.data.labels = [...timeLabels];
+      levelChart.data.datasets[0].data = [...levelHistory];
+      volumeChart.data.labels = [...timeLabels];
+      volumeChart.data.datasets[0].data = [...volumeHistory];
+      levelChart.update('none');
+      volumeChart.update('none');
+    }
+
+    function updateChartTheme() {
+      const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+      const tickColor = '#6b7a99';
+      [levelChart, volumeChart].forEach(c => {
+        if (!c) return;
+        c.options.scales.x.grid.color = gridColor;
+        c.options.scales.y.grid.color = gridColor;
+        c.options.scales.x.ticks.color = tickColor;
+        c.options.scales.y.ticks.color = tickColor;
+        c.update();
+      });
+    }
+
+    // ── AUTO REFRESH ──────────────────────────────────────────────
+    function startAutoRefresh() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(fetchData, AUTO_REFRESH_SEC * 1000);
+      document.getElementById('refreshInterval').textContent = AUTO_REFRESH_SEC + ' сек';
+    }
+
+    // Enter key login
+    document.getElementById('passInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    // Init charts on load
+    initCharts();
+  </script>
 </body>
+
 </html>
