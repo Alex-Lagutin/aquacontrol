@@ -1138,12 +1138,12 @@
     function updateUI(params) {
       // WaterTank
       const tank = params['WaterTank'] || {};
-      const level = tank['Level %'] ? ? null;
-      const liters = tank['Water L'] ? ? null;
-      const dist = tank['Distance cm'] ? ? null;
-      const alert = tank['LowAlert'] ? ? false;
-      const lastUpd = tank['Last Update'] ? ? '—';
-      const fw = tank['Firmware'] ? ? '—';
+      const level = tank['Level %'] || null;
+      const liters = tank['Water L'] || null;
+      const dist = tank['Distance cm'] || null;
+      const alert = tank['LowAlert'] || false;
+      const lastUpd = tank['Last Update'] || '—';
+      const fw = tank['Firmware'] || '—';
 
       if (level !== null) {
         document.getElementById('levelPct').textContent = Math.round(level);
@@ -1170,8 +1170,8 @@
       alert ? banner.classList.add('visible') : banner.classList.remove('visible');
 
       // Switches
-      const sw1 = (params['Obuvnitsa'] || {})['Power'] ? ? false;
-      const sw2 = (params['Vana'] || {})['Power'] ? ? false;
+      const sw1 = (params['Obuvnitsa'] || {})['Power'] || false;
+      const sw2 = (params['Vana'] || {})['Power'] || false;
       setSwitchUI(1, sw1);
       setSwitchUI(2, sw2);
       sw1State = sw1;
