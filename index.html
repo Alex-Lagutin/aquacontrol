@@ -1200,21 +1200,20 @@
       sw1State = newState;
 
       try {
-        await fetch(`${API}/user/nodes/params`, {
+        const r = await fetch(`${API}/user/nodes/params?node_id=${nodeId}`, {
           method: 'PUT',
           headers: {
             Authorization: token,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            node_id: nodeId,
-            params: {
-              [devName]: {
-                Power: newState
-              }
+            [devName]: {
+              Power: newState
             }
           })
         });
+        const rj = await r.json();
+        console.log('Switch response:', rj);
       } catch (e) {
         console.error('Switch error', e);
       }
