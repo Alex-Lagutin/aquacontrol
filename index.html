@@ -1098,10 +1098,8 @@
         });
         const data = await res.json();
 
-        if (data.node_details && data.node_details.length > 0) {
-          const node = data.node_details[0];
-          const params = node.params || {};
-          updateUI(params);
+        if (data && (data.WaterTank || data.TestSwitch)) {
+          updateUI(data);
         }
       } catch (e) {
         console.error('Fetch error', e);
