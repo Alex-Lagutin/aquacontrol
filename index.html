@@ -320,33 +320,86 @@
       bottom: 0;
       left: 0;
       right: 0;
+      --wave-front: rgba(0, 212, 255, 0.38);
+      --wave-back: rgba(255, 255, 255, 0.16);
       background: linear-gradient(180deg, rgba(0, 212, 255, 0.6) 0%, rgba(0, 153, 187, 0.8) 100%);
       transition: height 1.2s cubic-bezier(.4, 0, .2, 1);
       border-radius: 0 0 18px 18px;
+      box-shadow: inset 0 10px 24px rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      clip-path: polygon(0 9px, 8% 7px, 16% 10px, 24% 4px, 32% 7px, 40% 11px, 48% 6px, 56% 8px, 64% 10px, 72% 5px, 80% 8px, 88% 11px, 96% 7px, 100% 9px, 100% 100%, 0 100%);
+      animation: waterWave 3.8s ease-in-out infinite;
     }
 
+    .tank-water::before,
     .tank-water::after {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
+      left: -45%;
+      top: 3px;
+      width: 190%;
+      height: 12px;
+      pointer-events: none;
       background: linear-gradient(90deg,
-          transparent 0%, rgba(255, 255, 255, 0.4) 30%,
-          rgba(255, 255, 255, 0.2) 60%, transparent 100%);
-      animation: wave 3s ease-in-out infinite;
+          transparent 0%,
+          var(--wave-back) 18%,
+          var(--wave-front) 36%,
+          transparent 54%,
+          var(--wave-back) 72%,
+          transparent 100%);
+      opacity: 0.8;
+      animation: surfaceGlide 4.2s ease-in-out infinite;
+      will-change: transform, opacity;
     }
 
-    @keyframes wave {
+    .tank-water::after {
+      top: 8px;
+      height: 2px;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.42) 22%,
+          transparent 44%,
+          rgba(255, 255, 255, 0.28) 68%,
+          transparent 100%);
+      opacity: 0.65;
+      animation: surfaceGlide 3s ease-in-out infinite reverse;
+    }
+
+    @keyframes waterWave {
 
       0%,
       100% {
-        transform: translateX(-10px);
+        clip-path: polygon(0 9px, 8% 7px, 16% 10px, 24% 4px, 32% 7px, 40% 11px, 48% 6px, 56% 8px, 64% 10px, 72% 5px, 80% 8px, 88% 11px, 96% 7px, 100% 9px, 100% 100%, 0 100%);
       }
 
       50% {
-        transform: translateX(10px);
+        clip-path: polygon(0 6px, 8% 10px, 16% 7px, 24% 11px, 32% 5px, 40% 8px, 48% 10px, 56% 4px, 64% 7px, 72% 11px, 80% 6px, 88% 8px, 96% 10px, 100% 6px, 100% 100%, 0 100%);
+      }
+    }
+
+    @keyframes surfaceGlide {
+
+      0%,
+      100% {
+        transform: translateX(-8px);
+        opacity: 0.55;
+      }
+
+      50% {
+        transform: translateX(8px);
+        opacity: 0.9;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .tank-water::before,
+      .tank-water::after {
+        animation: none;
+      }
+
+      .tank-water {
+        animation: none;
       }
     }
 
@@ -1125,16 +1178,22 @@
       if (level !== null) {
         document.getElementById('levelPct').textContent = Math.round(level);
         document.getElementById('pctRemain').textContent = Math.round(level);
-        document.getElementById('tankWater').style.height = Math.round(level) + '%';
+        const w = document.getElementById('tankWater');
+        w.style.height = Math.round(level) + '%';
 
         // Water color by level
-        const w = document.getElementById('tankWater');
         if (level <= 20) {
           w.style.background = 'linear-gradient(180deg, rgba(255,77,106,0.7) 0%, rgba(200,30,60,0.9) 100%)';
+          w.style.setProperty('--wave-front', 'rgba(255, 77, 106, 0.42)');
+          w.style.setProperty('--wave-back', 'rgba(255, 255, 255, 0.16)');
         } else if (level <= 40) {
           w.style.background = 'linear-gradient(180deg, rgba(255,209,102,0.7) 0%, rgba(200,160,30,0.9) 100%)';
+          w.style.setProperty('--wave-front', 'rgba(255, 209, 102, 0.42)');
+          w.style.setProperty('--wave-back', 'rgba(255, 255, 255, 0.16)');
         } else {
           w.style.background = 'linear-gradient(180deg, rgba(0,212,255,0.6) 0%, rgba(0,153,187,0.8) 100%)';
+          w.style.setProperty('--wave-front', 'rgba(0, 212, 255, 0.38)');
+          w.style.setProperty('--wave-back', 'rgba(255, 255, 255, 0.16)');
         }
       }
       if (liters !== null) document.getElementById('waterL').textContent = liters.toFixed(1);
