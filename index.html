@@ -1076,37 +1076,11 @@
     }
 
     // ── GET NODE ID ───────────────────────────────────────────────
+    const FIXED_NODE_ID = 'ZFUx2gw2Ca28GeRHjpUkJj';
+
     async function getNodeId() {
-      try {
-        const res = await fetch(`${API}/user/nodes`, {
-          headers: {
-            Authorization: token
-          }
-        });
-        const data = await res.json();
-        if (data.nodes && data.nodes.length > 0) {
-          // Перевіряємо кожну ноду — шукаємо ту, де є WaterTank
-          for (const id of data.nodes) {
-            try {
-              const pRes = await fetch(`${API}/user/nodes/params?node_id=${id}`, {
-                headers: {
-                  Authorization: token
-                }
-              });
-              const pData = await pRes.json();
-              if (pData.WaterTank) {
-                nodeId = id;
-                break;
-              }
-            } catch {}
-          }
-          // Якщо не знайшли WaterTank — беремо першу ноду
-          if (!nodeId) nodeId = data.nodes[0];
-          document.getElementById('nodeStatus').textContent = 'Онлайн';
-        }
-      } catch {
-        console.error('Node fetch error');
-      }
+      nodeId = FIXED_NODE_ID;
+      document.getElementById('nodeStatus').textContent = 'Онлайн';
       await fetchData();
     }
 
