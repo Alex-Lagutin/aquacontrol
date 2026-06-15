@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AquaControl">
+  <defs>
+    <linearGradient id="bg" x1="80" x2="432" y1="64" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00d4ff"/>
+      <stop offset="1" stop-color="#00e5a0"/>
+    </linearGradient>
+    <linearGradient id="drop" x1="180" x2="332" y1="126" y2="392" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0a0e1a"/>
+      <stop offset="1" stop-color="#103347"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="#0a0e1a"/>
+  <rect x="42" y="42" width="428" height="428" rx="96" fill="url(#bg)"/>
+  <path fill="url(#drop)" d="M256 105c-40 60-96 132-96 196 0 59 41 106 96 106s96-47 96-106c0-64-56-136-96-196Zm0 260c-34 0-58-28-58-64 0-33 27-79 58-127 31 48 58 94 58 127 0 36-24 64-58 64Z"/>
+  <path fill="#00d4ff" d="M215 302c0 25 17 45 42 45 11 0 21-3 29-10-45 1-58-25-52-66-12 10-19 20-19 31Z" opacity=".55"/>
+</svg>
