@@ -902,25 +902,15 @@
     <!-- SWITCHES CARD -->
     <div class="card switches-card">
       <div class="card-title">⚡ Перемикачі</div>
-      <div class="switches-grid">
+      <div class="switches-grid" style="grid-template-columns: 1fr">
         <div class="switch-item" id="sw1Card">
           <div class="switch-top">
             <div class="switch-icon" id="sw1Icon">🔌</div>
             <div class="toggle" id="sw1Toggle" onclick="toggleSwitch(1)"></div>
           </div>
           <div>
-            <div class="switch-name">Obuvnitsa</div>
+            <div class="switch-name">TestSwitch</div>
             <div class="switch-status" id="sw1Status">Вимкнено</div>
-          </div>
-        </div>
-        <div class="switch-item" id="sw2Card">
-          <div class="switch-top">
-            <div class="switch-icon" id="sw2Icon">🔌</div>
-            <div class="toggle" id="sw2Toggle" onclick="toggleSwitch(2)"></div>
-          </div>
-          <div>
-            <div class="switch-name">Vana</div>
-            <div class="switch-status" id="sw2Status">Вимкнено</div>
           </div>
         </div>
       </div>
@@ -994,7 +984,6 @@
     let token = null;
     let nodeId = null;
     let sw1State = false;
-    let sw2State = false;
     let refreshTimer = null;
 
     // Chart history
@@ -1170,12 +1159,9 @@
       alert ? banner.classList.add('visible') : banner.classList.remove('visible');
 
       // Switches
-      const sw1 = (params['Obuvnitsa'] || {})['Power'] || false;
-      const sw2 = (params['Vana'] || {})['Power'] || false;
+      const sw1 = (params['TestSwitch'] || {})['Power'] || false;
       setSwitchUI(1, sw1);
-      setSwitchUI(2, sw2);
       sw1State = sw1;
-      sw2State = sw2;
 
       // Charts
       if (level !== null) {
@@ -1219,12 +1205,11 @@
     // ── TOGGLE SWITCH ─────────────────────────────────────────────
     async function toggleSwitch(n) {
       if (!token || !nodeId) return;
-      const newState = n === 1 ? !sw1State : !sw2State;
-      const devName = n === 1 ? 'Obuvnitsa' : 'Vana';
+      const newState = !sw1State;
+      const devName = 'TestSwitch';
 
       setSwitchUI(n, newState);
-      if (n === 1) sw1State = newState;
-      else sw2State = newState;
+      sw1State = newState;
 
       try {
         await fetch(`${API}/user/nodes/params`, {
